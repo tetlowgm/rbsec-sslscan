@@ -66,7 +66,6 @@
     // Visual Studio doesn't have ssize_t...
     typedef int ssize_t;
   #else
-    void *memmem(const void *haystack_start, size_t haystack_len, const void *needle, size_t needle_len);
     /* Taken from https://sourceforge.net/p/mingw/bugs/_discuss/thread/ec0291f1/93ae/attachment/patchset-wrapped.diff:*/
     #define timersub(a, b, result) \
     do { \
@@ -102,9 +101,7 @@
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
 #include <openssl/ocsp.h>
-#ifdef __linux__
-    #include <arpa/inet.h>
-#endif
+#include <arpa/inet.h>
 #ifndef OPENSSL_NO_COMP
   #include <openssl/comp.h>
 #endif
@@ -134,8 +131,6 @@
 
 /** Does output xml to stdout? */
 static int xml_to_stdout = 0;
-
-const char *inet_ntop(int af, const void *src, char *dst, socklen_t size);
 
 const SSL_METHOD *TLSv1_3_client_method(void)
 {

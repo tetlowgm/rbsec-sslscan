@@ -165,9 +165,8 @@ SSL *new_SSL(SSL_CTX *ctx) {
 }
 
 // Adds Ciphers to the Cipher List structure
-int populateCipherList(struct sslCheckOptions *options, const SSL_METHOD *sslMethod)
+void populateCipherList(struct sslCheckOptions *options, const SSL_METHOD *sslMethod)
 {
-    int returnCode = true;
     struct sslCipher *sslCipherPointer;
     int tempInt;
     int loop;
@@ -177,34 +176,32 @@ int populateCipherList(struct sslCheckOptions *options, const SSL_METHOD *sslMet
     options->ctx = new_CTX(sslMethod);
     if (options->ctx == NULL) {
         printf_error("Could not create CTX object.");
-        return false;
+        return;
     }
     SSL_CTX_set_cipher_list(options->ctx, CIPHERSUITE_LIST_ALL);
     ssl = new_SSL(options->ctx);
     if (ssl == NULL) {
         printf_error("Could not create SSL object.");
         FREE_CTX(options->ctx);
-        return false;
+        return;
     }
     cipherList = SSL_get_ciphers(ssl);
     // Create Cipher Struct Entries...
+    sslCipherPointer = options->ciphers;
     for (loop = 0; loop < sk_SSL_CIPHER_num(cipherList); loop++)
     {
         if (options->ciphers == 0)
         {
-            options->ciphers = malloc(sizeof(struct sslCipher));
+            options->ciphers = calloc(1, sizeof(struct sslCipher));
             sslCipherPointer = options->ciphers;
         }
         else
         {
-            sslCipherPointer = options->ciphers;
             while (sslCipherPointer->next != 0)
                 sslCipherPointer = sslCipherPointer->next;
-            sslCipherPointer->next = malloc(sizeof(struct sslCipher));
+            sslCipherPointer->next = calloc(1, sizeof(struct sslCipher));
             sslCipherPointer = sslCipherPointer->next;
         }
-        // Init
-        memset(sslCipherPointer, 0, sizeof(struct sslCipher));
         // Add cipher information...
         sslCipherPointer->sslMethod = sslMethod;
         sslCipherPointer->name = SSL_CIPHER_get_name(sk_SSL_CIPHER_value(cipherList, loop));
@@ -214,7 +211,6 @@ int populateCipherList(struct sslCheckOptions *options, const SSL_METHOD *sslMet
     }
     FREE_SSL(ssl);
     FREE_CTX(options->ctx);
-    return returnCode;
 }
 
 // File Exists
